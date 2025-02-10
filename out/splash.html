@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Line</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #000; /* Fundo preto */
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+    }
+
+    .line-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .line {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0%;
+      height: 2px;
+      background-color: white;
+      transform: translate(-50%, -50%);
+      animation: drawLine 2s ease-out forwards;
+    }
+
+    .text-above, .text-below {
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      animation: fadeInText 1s ease-out forwards;
+      font-weight: 600; /* Negrito */
+      letter-spacing: 1px; /* Aumenta o espaçamento entre as letras */
+    }
+
+    .text-above {
+      top: calc(50% - 30px); /* Ajuste para cima */
+      font-size: 28px; /* Tamanho maior */
+      animation-delay: 1.5s; /* Sincronizar com a linha */
+    }
+
+    .text-below {
+      top: calc(50% + 10px); /* Ajuste para baixo */
+      font-size: 24px; /* Tamanho maior */
+      animation-delay: 2s; /* Sincronizar com a linha */
+    }
+
+    @keyframes drawLine {
+      0% {
+        width: 0%;
+      }
+      100% {
+        width: 100%;
+      }
+    }
+
+    @keyframes fadeInText {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="line-container">
+    <div class="text-above">Powered By</div>
+    <div class="line"></div>
+    <div class="text-below">Aliança Engenharia & MPC Projetos</div>
+  </div>
+</body>
+</html>
