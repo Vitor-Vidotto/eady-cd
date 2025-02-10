@@ -11,9 +11,7 @@ export default function CdPage() {
     pocao: false,
     ultimate: false,
   });
-  const [users, setUsers] = useState<{ [key: string]: { cooldown: { [key: string]: boolean } } }>(
-    {}
-  );
+  const [users, setUsers] = useState<{ [key: string]: { cooldown: { [key: string]: boolean } } }>( {});
   const [orderedUsers, setOrderedUsers] = useState<string[]>([]);
   const [cooldownTimes, setCooldownTimes] = useState({
     bota: 60,
@@ -22,7 +20,7 @@ export default function CdPage() {
     ultimate: 60,
   });
 
-  const partyId = localStorage.getItem("partyId");
+  const partyId = typeof window !== "undefined" ? localStorage.getItem("partyId") : null;
 
   // Função para atualizar o cooldown específico no Firebase sem sobrescrever os outros cooldowns
   const updateCooldown = (nickname: string, cooldownName: string, cooldownStatus: boolean) => {
@@ -39,7 +37,8 @@ export default function CdPage() {
       .catch((error) => console.error("Erro ao atualizar cooldown:", error));
   };
 
-  const startCooldownTimer = (cooldownName: string, nickname: string) => {
+  // Função para iniciar o timer do cooldown
+  const startCooldownTimer = (cooldownName: keyof typeof cooldownTimes, nickname: string) => {
     const cooldownTime = cooldownTimes[cooldownName] * 1000; // Tempo do cooldown em milissegundos
 
     setCooldowns((prevCooldowns) => ({
@@ -60,6 +59,7 @@ export default function CdPage() {
     }, cooldownTime); // Usa o tempo configurado no login
   };
 
+  // Efeito para pegar a lista de usuários e suas informações de cooldown do Firebase
   useEffect(() => {
     if (!partyId) {
       console.error("Party ID não encontrado");
@@ -72,7 +72,7 @@ export default function CdPage() {
       if (data) {
         setUsers(data);
 
-        const savedOrder = localStorage.getItem("orderedUsers");
+        const savedOrder = typeof window !== "undefined" ? localStorage.getItem("orderedUsers") : null;
         const savedOrderArray = savedOrder ? JSON.parse(savedOrder) : [];
 
         const newOrderedUsers = [
@@ -81,48 +81,52 @@ export default function CdPage() {
         ];
 
         setOrderedUsers(newOrderedUsers);
-        localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+        if (typeof window !== "undefined") {
+          localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+        }
       }
     });
   }, [partyId]);
 
   // Puxar o tempo de cooldown do login
   useEffect(() => {
-    const storedUltimateCooldown = localStorage.getItem('ultimateCooldown');
-    const storedPeitoCooldown = localStorage.getItem('peitoCooldown');
-    const storedBotaCooldown = localStorage.getItem('botaCooldown');
-    const storedPocaoCooldown = localStorage.getItem('pocaoCooldown');
+    if (typeof window !== "undefined") {
+      const storedUltimateCooldown = localStorage.getItem('ultimateCooldown');
+      const storedPeitoCooldown = localStorage.getItem('peitoCooldown');
+      const storedBotaCooldown = localStorage.getItem('botaCooldown');
+      const storedPocaoCooldown = localStorage.getItem('pocaoCooldown');
 
-    if (storedUltimateCooldown) {
-      setCooldownTimes((prev) => ({
-        ...prev,
-        ultimate: parseInt(storedUltimateCooldown),
-      }));
-    }
-    if (storedPeitoCooldown) {
-      setCooldownTimes((prev) => ({
-        ...prev,
-        peito: parseInt(storedPeitoCooldown),
-      }));
-    }
-    if (storedBotaCooldown) {
-      setCooldownTimes((prev) => ({
-        ...prev,
-        bota: parseInt(storedBotaCooldown),
-      }));
-    }
-    if (storedPocaoCooldown) {
-      setCooldownTimes((prev) => ({
-        ...prev,
-        pocao: parseInt(storedPocaoCooldown),
-      }));
+      if (storedUltimateCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          ultimate: parseInt(storedUltimateCooldown),
+        }));
+      }
+      if (storedPeitoCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          peito: parseInt(storedPeitoCooldown),
+        }));
+      }
+      if (storedBotaCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          bota: parseInt(storedBotaCooldown),
+        }));
+      }
+      if (storedPocaoCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          pocao: parseInt(storedPocaoCooldown),
+        }));
+      }
     }
   }, []);
 
+  // Escutando os eventos de cooldown emitidos do backend
   useEffect(() => {
-    // Escutando os eventos de cooldown emitidos do backend
     const handleCooldownEvent = (event: { event: string }) => {
-      const nickname = localStorage.getItem("nickname");
+      const nickname = typeof window !== "undefined" ? localStorage.getItem("nickname") : null;
       if (!nickname) return;
 
       switch (event.event) {
@@ -158,6 +162,7 @@ export default function CdPage() {
     };
   }, [partyId, cooldownTimes]);
 
+  // Função para mover os usuários para cima ou para baixo
   const moveUser = (index: number, direction: "up" | "down") => {
     const newOrderedUsers = [...orderedUsers];
 
@@ -170,7 +175,9 @@ export default function CdPage() {
     }
 
     setOrderedUsers(newOrderedUsers);
-    localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+    }
   };
 
   return (

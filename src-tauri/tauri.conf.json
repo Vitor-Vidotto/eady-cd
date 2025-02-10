@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Lista Mestra",  
+  "productName": "Easy CD",  
   "version": "0.1.0",
   "identifier": "listamestra",
   "build": {
@@ -12,17 +12,17 @@
   "app": {
     "windows": [
       {
-        "title": "Lista Mestra",  
+        "title": "Easy CD",  
         "width": 900,
         "height": 800,
         "resizable": true,
         "fullscreen": false,
-        "url": "http://localhost:3000",
+        "url": "file///H:/albion-cooldown/out/index.html",
         "label": "listamestra", 
         "visible": true
       },
       {
-        "title": "Lista Mestra", 
+        "title": "Easy CD", 
         "width": 900,
         "height": 800,
         "url": "splash.html",
