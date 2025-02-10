@@ -95,6 +95,7 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "device_query",
  "dpi",
  "lazy_static",
  "log",
@@ -106,6 +107,7 @@ dependencies = [
  "tauri-plugin-dialog",
  "tauri-plugin-global-shortcut",
  "tauri-plugin-log",
+ "tokio",
 ]
 
 [[package]]
@@ -863,6 +865,20 @@ dependencies = [
  "quote",
  "rustc_version",
  "syn 2.0.87",
+]
+
+[[package]]
+name = "device_query"
+version = "0.2.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0500656e17fa3bf720de64b28b6fb28c3602307fc7afbb078c6643d836acaa28"
+dependencies = [
+ "input-event-codes",
+ "pkg-config",
+ "readkey",
+ "readmouse",
+ "winapi",
+ "x11",
 ]
 
 [[package]]
@@ -1943,6 +1959,12 @@ checksum = "bc150e5ce2330295b8616ce0e3f53250e53af31759a9dbedad1621ba29151847"
 dependencies = [
  "cfb",
 ]
+
+[[package]]
+name = "input-event-codes"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e5ce56b9cb50796f260af5d7ccd957727d5390e575b1917f2722bd9813faabd"
 
 [[package]]
 name = "instant"
@@ -3122,6 +3144,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
 
 [[package]]
+name = "readkey"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86d401b6d6a1725a59f1b4e813275d289dff3ad09c72b373a10a7a8217ba3146"
+
+[[package]]
+name = "readmouse"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be105c72a1e6a5a1198acee3d5b506a15676b74a02ecd78060042a447f408d94"
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4296,11 +4330,24 @@ dependencies = [
  "bytes",
  "libc",
  "mio",
+ "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2",
+ "tokio-macros",
  "tracing",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "693d596312e88961bc67d7f1f97af8a70227d9f90c31bba5806eec004978d752"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
 ]
 
 [[package]]

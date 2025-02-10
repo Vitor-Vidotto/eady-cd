@@ -1,62 +1,65 @@
+'use client'
 import React, { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { db } from "../firebase/firebaseConfig";
-import { ref, set, onValue } from "firebase/database";
+import { ref, set, update, onValue } from "firebase/database";
 
 export default function CdPage() {
-  const [countdown, setCountdown] = useState(60);
-  const [isCooldownActive, setIsCooldownActive] = useState(false);
-  const [users, setUsers] = useState<{ [key: string]: { cooldown: boolean } }>(
-    {}
-  );
+  const [cooldowns, setCooldowns] = useState({
+    bota: false,
+    peito: false,
+    pocao: false,
+    ultimate: false,
+  });
+  const [users, setUsers] = useState<{ [key: string]: { cooldown: { [key: string]: boolean } } }>( {});
   const [orderedUsers, setOrderedUsers] = useState<string[]>([]);
+  const [cooldownTimes, setCooldownTimes] = useState({
+    bota: 60,
+    peito: 60,
+    pocao: 60,
+    ultimate: 60,
+  });
 
-  // Obter o ID da party do localStorage
-  const partyId = localStorage.getItem("partyId");
+  const partyId = typeof window !== "undefined" ? localStorage.getItem("partyId") : null;
 
-  const updateCooldown = (nickname: string, cooldownStatus: boolean) => {
+  // Função para atualizar o cooldown específico no Firebase sem sobrescrever os outros cooldowns
+  const updateCooldown = (nickname: string, cooldownName: string, cooldownStatus: boolean) => {
     if (!partyId) {
       console.error("Party ID não encontrado");
       return;
     }
 
-    const userRef = ref(db, `parties/${partyId}/users/${nickname}`);
-    set(userRef, { cooldown: cooldownStatus })
-      .then(() => console.log(`${nickname} cooldown atualizado com sucesso`))
+    const userRef = ref(db, `parties/${partyId}/users/${nickname}/cooldown`);
+    update(userRef, {
+      [cooldownName]: cooldownStatus,
+    })
+      .then(() => console.log(`${nickname} cooldown de ${cooldownName} atualizado com sucesso`))
       .catch((error) => console.error("Erro ao atualizar cooldown:", error));
   };
 
-  const startCooldown = () => {
-    setIsCooldownActive(true);
-    const nickname = localStorage.getItem("nickname");
-    if (nickname) {
-      updateCooldown(nickname, true);
-    }
+  // Função para iniciar o timer do cooldown
+  const startCooldownTimer = (cooldownName: keyof typeof cooldownTimes, nickname: string) => {
+    const cooldownTime = cooldownTimes[cooldownName] * 1000; // Tempo do cooldown em milissegundos
 
-    let timer = 60;
-    const interval = setInterval(() => {
-      timer -= 1;
-      setCountdown(timer);
-      if (timer <= 0) {
-        clearInterval(interval);
-        setIsCooldownActive(false);
-        if (nickname) {
-          updateCooldown(nickname, false);
-        }
-      }
-    }, 1000);
+    setCooldowns((prevCooldowns) => ({
+      ...prevCooldowns,
+      [cooldownName]: true,
+    }));
+
+    // Atualizar o Firebase para indicar que o cooldown foi ativado
+    updateCooldown(nickname, cooldownName, true);
+
+    // Iniciar o timer independente para cada cooldown
+    setTimeout(() => {
+      setCooldowns((prevCooldowns) => ({
+        ...prevCooldowns,
+        [cooldownName]: false,
+      }));
+      updateCooldown(nickname, cooldownName, false);
+    }, cooldownTime); // Usa o tempo configurado no login
   };
 
-  useEffect(() => {
-    const handleCooldownEvent = () => {
-      if (!isCooldownActive) {
-        startCooldown();
-      }
-    };
-
-    listen("cooldown", handleCooldownEvent);
-  }, [isCooldownActive, countdown]);
-
+  // Efeito para pegar a lista de usuários e suas informações de cooldown do Firebase
   useEffect(() => {
     if (!partyId) {
       console.error("Party ID não encontrado");
@@ -69,21 +72,97 @@ export default function CdPage() {
       if (data) {
         setUsers(data);
 
-        const savedOrder = localStorage.getItem("orderedUsers");
+        const savedOrder = typeof window !== "undefined" ? localStorage.getItem("orderedUsers") : null;
         const savedOrderArray = savedOrder ? JSON.parse(savedOrder) : [];
 
-        // Criar uma nova lista contendo todos os usuários (mantendo a ordem salva e adicionando novos)
         const newOrderedUsers = [
-          ...savedOrderArray.filter((user: string) => data[user]), // Manter os usuários que ainda existem no Firebase
-          ...Object.keys(data).filter((user) => !savedOrderArray.includes(user)), // Adicionar novos usuários
+          ...savedOrderArray.filter((user: string) => data[user]),
+          ...Object.keys(data).filter((user) => !savedOrderArray.includes(user)),
         ];
 
         setOrderedUsers(newOrderedUsers);
-        localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+        if (typeof window !== "undefined") {
+          localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+        }
       }
     });
   }, [partyId]);
 
+  // Puxar o tempo de cooldown do login
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUltimateCooldown = localStorage.getItem('ultimateCooldown');
+      const storedPeitoCooldown = localStorage.getItem('peitoCooldown');
+      const storedBotaCooldown = localStorage.getItem('botaCooldown');
+      const storedPocaoCooldown = localStorage.getItem('pocaoCooldown');
+
+      if (storedUltimateCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          ultimate: parseInt(storedUltimateCooldown),
+        }));
+      }
+      if (storedPeitoCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          peito: parseInt(storedPeitoCooldown),
+        }));
+      }
+      if (storedBotaCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          bota: parseInt(storedBotaCooldown),
+        }));
+      }
+      if (storedPocaoCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          pocao: parseInt(storedPocaoCooldown),
+        }));
+      }
+    }
+  }, []);
+
+  // Escutando os eventos de cooldown emitidos do backend
+  useEffect(() => {
+    const handleCooldownEvent = (event: { event: string }) => {
+      const nickname = typeof window !== "undefined" ? localStorage.getItem("nickname") : null;
+      if (!nickname) return;
+
+      switch (event.event) {
+        case "bota":
+          startCooldownTimer("bota", nickname);
+          break;
+        case "peito":
+          startCooldownTimer("peito", nickname);
+          break;
+        case "pocao":
+          startCooldownTimer("pocao", nickname);
+          break;
+        case "ultimate":
+          startCooldownTimer("ultimate", nickname);
+          break;
+        default:
+          break;
+      }
+    };
+
+    // Registrando os ouvintes de eventos
+    listen("bota", handleCooldownEvent);
+    listen("peito", handleCooldownEvent);
+    listen("pocao", handleCooldownEvent);
+    listen("ultimate", handleCooldownEvent);
+
+    return () => {
+      // Removendo os ouvintes de eventos ao desmontar o componente
+      listen("bota", handleCooldownEvent).then((unlisten) => unlisten());
+      listen("peito", handleCooldownEvent).then((unlisten) => unlisten());
+      listen("pocao", handleCooldownEvent).then((unlisten) => unlisten());
+      listen("ultimate", handleCooldownEvent).then((unlisten) => unlisten());
+    };
+  }, [partyId, cooldownTimes]);
+
+  // Função para mover os usuários para cima ou para baixo
   const moveUser = (index: number, direction: "up" | "down") => {
     const newOrderedUsers = [...orderedUsers];
 
@@ -96,7 +175,9 @@ export default function CdPage() {
     }
 
     setOrderedUsers(newOrderedUsers);
-    localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
+    }
   };
 
   return (
@@ -107,7 +188,7 @@ export default function CdPage() {
         <h3 className="text-xl mb-2">Usuários:</h3>
         <div>
           {orderedUsers.map((nickname, index) => {
-            const cooldownStatus = users[nickname]?.cooldown;
+            const userCooldowns = users[nickname]?.cooldown || {};
             return (
               <div
                 key={nickname}
@@ -115,11 +196,20 @@ export default function CdPage() {
               >
                 <span className="flex-1">
                   {nickname}:{" "}
-                  <span
-                    className={cooldownStatus ? "text-red-500" : "text-green-500"}
-                  >
-                    {cooldownStatus ? "  Cooldown Ativo" : "  Cooldown Inativo"}
-                  </span>
+                  {Object.keys(cooldowns).map((cooldownName) => {
+                    const isCooldownActive = userCooldowns[cooldownName];
+                    return (
+                      <span
+                        key={cooldownName}
+                        className={`mr-2 ${
+                          isCooldownActive ? "text-red-500" : "text-green-500"
+                        }`}
+                      >
+                        {cooldownName.charAt(0).toUpperCase() + cooldownName.slice(1)}{" "}
+                        {isCooldownActive ? "Ativo" : "Inativo"}
+                      </span>
+                    );
+                  })}
                 </span>
                 <button
                   onClick={() => moveUser(index, "up")}

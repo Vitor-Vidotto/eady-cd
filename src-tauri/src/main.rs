@@ -1,39 +1,60 @@
 use tauri::{Manager, AppHandle, Emitter};
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+use device_query::{DeviceQuery, Keycode, DeviceState};
 
 fn synchronize(app: &tauri::AppHandle) {
-  // Emite o evento 'cooldown' para todas as webviews
-  app.emit("cooldown", None::<()>).expect("Falha ao emitir evento");
-  println!("emitido")
+    app.emit("cooldown", None::<()>).expect("Falha ao emitir evento");
+    println!("emitido")
 }
+
+fn ult(app: &tauri::AppHandle) {
+    app.emit("ultimate", None::<()>).expect("Falha ao emitir evento");
+    println!("ultimate")
+}
+
+fn peito(app: &tauri::AppHandle) {
+    app.emit("peito", None::<()>).expect("Falha ao emitir evento");
+    println!("peito")
+}
+
+fn bota(app: &tauri::AppHandle) {
+    app.emit("bota", None::<()>).expect("Falha ao emitir evento");
+    println!("bota")
+}
+
+fn pocao(app: &tauri::AppHandle) {
+    app.emit("pocao", None::<()>).expect("Falha ao emitir evento");
+    println!("pocao")
+}
+
+fn monitor_keyboard(app: AppHandle) {
+    let device_state = DeviceState::new();
+    loop {
+        let keys = device_state.get_keys();
+        if keys.contains(&Keycode::Key1) {
+            pocao(&app);
+        }
+        if keys.contains(&Keycode::E) {
+            ult(&app);
+        }
+        if keys.contains(&Keycode::R) {
+            peito(&app);
+        }
+        if keys.contains(&Keycode::F) {
+            bota(&app);
+        }
+        std::thread::sleep(std::time::Duration::from_millis(100)); // Evitar uso excessivo de CPU
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            #[cfg(desktop)]
-            {
-                // Defina o atalho para a tecla "1"
-                let key_1_shortcut = Shortcut::new(None, Code::Digit1);
+            // Iniciar a monitoração do teclado em uma thread separada
+            let app_handle = app.handle().clone();
+            std::thread::spawn(move || {
+                monitor_keyboard(app_handle);
+            });
 
-                // Registre o atalho com o Tauri
-                app.handle().plugin(
-                    tauri_plugin_global_shortcut::Builder::new().with_handler(move |_app, shortcut, event| {
-                        println!("{:?}", shortcut);
-                        if shortcut == &key_1_shortcut {
-                            match event.state() {
-                                ShortcutState::Pressed => {
-                                  synchronize(_app);
-                                }
-                                ShortcutState::Released => {
-                                }
-                            }
-                        }
-                    })
-                    .build(),
-                )?;
-
-                // Registrar o atalho global para a tecla "1"
-                app.global_shortcut().register(key_1_shortcut)?;
-            }
             Ok(())
         })
         .run(tauri::generate_context!())
