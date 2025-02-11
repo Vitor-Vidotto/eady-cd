@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { db } from "../firebase/firebaseConfig";
 import { ref, set, update, onValue } from "firebase/database";
+import BackToMenuButton, { DeleteUserButton } from "./buttonRtnLogin";
 
 export default function CdPage() {
   const [cooldowns, setCooldowns] = useState({
@@ -228,6 +229,7 @@ export default function CdPage() {
           })}
         </div>
       </div>
+      <BackToMenuButton />
     </div>
   );
 }
