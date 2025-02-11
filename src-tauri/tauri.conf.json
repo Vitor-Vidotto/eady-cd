@@ -17,8 +17,10 @@
         "height": 800,
         "resizable": true,
         "fullscreen": false,
+        "transparent": true,
+        "alwaysOnTop": true,
         "url": "file///H:/albion-cooldown/out/index.html",
-        "label": "listamestra", 
+        "label": "easycd", 
         "visible": true
       },
       {
