@@ -4,11 +4,12 @@ import { listen } from "@tauri-apps/api/event";
 import { db } from "../firebase/firebaseConfig";
 import { ref, set, update, onValue } from "firebase/database";
 import BackToMenuButton, { DeleteUserButton } from "./buttonRtnLogin";
-import { BeakerIcon, BoltIcon, FireIcon, ShieldExclamationIcon, StarIcon } from "@heroicons/react/16/solid";
+import { BeakerIcon, BoltIcon, FireIcon, ShieldExclamationIcon, StarIcon, UserIcon } from "@heroicons/react/16/solid";
 
 const colorOptions = {
   default: "rgba(31, 41, 55, 0.2)", // Cinza escuro
   green: "rgba(34, 197, 94, 0.2)",  // Verde
+  blue: "rgba(0, 68, 238, 0.2)",  
   red: "rgba(239, 68, 68, 0.2)",    // Vermelho
   yellow: "rgba(234, 179, 8, 0.2)", // Amarelo
 };
@@ -16,6 +17,7 @@ export default function CdPage() {
   const [cooldowns, setCooldowns] = useState({
     bota: false,
     peito: false,
+    elmo: false,
     pocao: false,
     ultimate: false,
   });
@@ -24,6 +26,7 @@ export default function CdPage() {
   const [cooldownTimes, setCooldownTimes] = useState({
     bota: 60,
     peito: 60,
+    elmo: 60,
     pocao: 60,
     ultimate: 60,
   });
@@ -103,6 +106,7 @@ const [tempColors, setTempColors] = useState({});
       const storedUltimateCooldown = localStorage.getItem('ultimateCooldown');
       const storedPeitoCooldown = localStorage.getItem('peitoCooldown');
       const storedBotaCooldown = localStorage.getItem('botaCooldown');
+      const storedElmoCooldown = localStorage.getItem('elmoCooldown');
       const storedPocaoCooldown = localStorage.getItem('pocaoCooldown');
 
       if (storedUltimateCooldown) {
@@ -121,6 +125,12 @@ const [tempColors, setTempColors] = useState({});
         setCooldownTimes((prev) => ({
           ...prev,
           bota: parseInt(storedBotaCooldown),
+        }));
+      }
+      if (storedElmoCooldown) {
+        setCooldownTimes((prev) => ({
+          ...prev,
+          elmo: parseInt(storedElmoCooldown),
         }));
       }
       if (storedPocaoCooldown) {
@@ -148,6 +158,9 @@ const [tempColors, setTempColors] = useState({});
         case "pocao":
           startCooldownTimer("pocao", nickname);
           break;
+        case "elmo":
+          startCooldownTimer("elmo", nickname);
+          break;
         case "ultimate":
           startCooldownTimer("ultimate", nickname);
           break;
@@ -159,6 +172,7 @@ const [tempColors, setTempColors] = useState({});
     // Registrando os ouvintes de eventos
     listen("bota", handleCooldownEvent);
     listen("peito", handleCooldownEvent);
+    listen("elmo", handleCooldownEvent);
     listen("pocao", handleCooldownEvent);
     listen("ultimate", handleCooldownEvent);
 
@@ -166,6 +180,7 @@ const [tempColors, setTempColors] = useState({});
       // Removendo os ouvintes de eventos ao desmontar o componente
       listen("bota", handleCooldownEvent).then((unlisten) => unlisten());
       listen("peito", handleCooldownEvent).then((unlisten) => unlisten());
+      listen("elmo", handleCooldownEvent).then((unlisten) => unlisten());
       listen("pocao", handleCooldownEvent).then((unlisten) => unlisten());
       listen("ultimate", handleCooldownEvent).then((unlisten) => unlisten());
     };
@@ -213,14 +228,14 @@ const [tempColors, setTempColors] = useState({});
       <BackToMenuButton />
     </div>)}
     <div className="mt-6 w-full">
-      <div className="flex flex-wrap justify-start gap-2">
+      <div className="flex flex-wrap justify-start gap-4">
         {orderedUsers.map((nickname, index) => {
           const userCooldowns = users[nickname]?.cooldown || {};
           const bgColor = tempColors[nickname] || colorOptions.default;
           return (
             <div
               key={nickname}
-              className="flex items-center p-3 bg-gray-800 text-white rounded opacity-80 w-32 h-20 justify-center flex-grow sm:w-28 md:w-32 lg:w-36"
+              className="flex items-center p-4 bg-gray-800 text-white rounded opacity-80 w-36 h-24 justify-center flex-grow sm:w-28 md:w-36 lg:w-38"
               style={{ backgroundColor: bgColor }}
             >
               <div className="flex flex-col items-center">
@@ -234,6 +249,8 @@ const [tempColors, setTempColors] = useState({});
                           return <BoltIcon className="h-4 w-4" />;
                         case "peito":
                           return <ShieldExclamationIcon className="h-4 w-4" />;
+                        case "elmo":
+                          return <UserIcon className="h-4 w-4" />;
                         case "pocao":
                           return <BeakerIcon className="h-4 w-4" />;
                         case "ultimate":
@@ -271,6 +288,7 @@ const [tempColors, setTempColors] = useState({});
                   >
                     <option value="default">Padrão</option>
                     <option value={colorOptions.green}>Verde</option>
+                    <option value={colorOptions.blue}>Azul</option>
                     <option value={colorOptions.red}>Vermelho</option>
                     <option value={colorOptions.yellow}>Amarelo</option>
                   </select>

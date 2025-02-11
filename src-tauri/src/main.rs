@@ -25,6 +25,11 @@ fn pocao(app: &tauri::AppHandle) {
     app.emit("pocao", None::<()>).expect("Falha ao emitir evento");
     println!("pocao");
 }
+fn elmo(app: &tauri::AppHandle) {
+    app.emit("elmo", None::<()>).expect("Falha ao emitir evento");
+    println!("elmo");
+}
+
 
 // Alterna as bordas da janela (decorations) e permite clicar através
 fn toggle_decorations(app: &AppHandle) {
@@ -59,6 +64,9 @@ fn monitor_keyboard(app: AppHandle) {
         }
         if keys.contains(&Keycode::F) {
             bota(&app);
+        }
+        if keys.contains(&Keycode::D) {
+            elmo(&app);
         }
         if keys.contains(&Keycode::F2) {
             toggle_decorations(&app);
