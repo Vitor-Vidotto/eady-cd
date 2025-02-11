@@ -10,6 +10,7 @@ export default function Login() {
   const [peitoCooldown, setPeitoCooldown] = useState('');
   const [botaCooldown, setBotaCooldown] = useState('');
   const [pocaoCooldown, setPocaoCooldown] = useState('');
+  const [elmoCooldown, setElmoCooldown] = useState('');
   const router = useRouter();
 
   const handleLogin = () => {
@@ -25,6 +26,7 @@ export default function Login() {
     // Armazenar os tempos de cooldown localmente no localStorage
     localStorage.setItem('ultimateCooldown', ultimateCooldown);
     localStorage.setItem('peitoCooldown', peitoCooldown);
+    localStorage.setItem('elmoCooldown', peitoCooldown);
     localStorage.setItem('botaCooldown', botaCooldown);
     localStorage.setItem('pocaoCooldown', pocaoCooldown);
 
@@ -71,6 +73,13 @@ export default function Login() {
           value={ultimateCooldown}
           onChange={(e) => setUltimateCooldown(e.target.value)}
           placeholder="Cooldown Ultimate (em segundos)"
+        />
+        <input
+          type="number"
+          className="w-full p-2 border border-gray-300 rounded mb-4"
+          value={elmoCooldown}
+          onChange={(e) => setElmoCooldown(e.target.value)}
+          placeholder="Cooldown Elmo (em segundos)"
         />
         <input
           type="number"
