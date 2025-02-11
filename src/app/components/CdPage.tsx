@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { db } from "../firebase/firebaseConfig";
 import { ref, set, update, onValue } from "firebase/database";
 import BackToMenuButton, { DeleteUserButton } from "./buttonRtnLogin";
+import { BeakerIcon, BoltIcon, FireIcon, ShieldExclamationIcon, StarIcon } from "@heroicons/react/16/solid";
 
 export default function CdPage() {
   const [cooldowns, setCooldowns] = useState({
@@ -182,54 +183,73 @@ export default function CdPage() {
   };
 
   return (
-    <div className="flex flex-col items-center p-4">
-      <h2 className="text-center text-2xl mb-4">Sistema de Cooldown</h2>
-
-      <div className="mt-6 w-full">
-        <h3 className="text-xl mb-2">Usuários:</h3>
-        <div>
-          {orderedUsers.map((nickname, index) => {
-            const userCooldowns = users[nickname]?.cooldown || {};
-            return (
-              <div
-                key={nickname}
-                className="flex items-center mb-2 p-2 bg-gray-800 text-white rounded"
-              >
-                <span className="flex-1">
-                  {nickname}:{" "}
+  <div className="flex flex-col items-center">
+    <div className="sm:hidden"> {/* Oculta o botão em telas pequenas */}
+      <BackToMenuButton />
+    </div>
+    <div className="mt-6 w-full">
+      <div className="flex flex-wrap justify-start gap-2">
+        {orderedUsers.map((nickname, index) => {
+          const userCooldowns = users[nickname]?.cooldown || {};
+          return (
+            <div
+              key={nickname}
+              className="flex items-center p-3 bg-gray-800 text-white rounded opacity-80 w-32 h-20 justify-center flex-grow sm:w-28 md:w-32 lg:w-36"
+              style={{ backgroundColor: 'rgba(31, 41, 55, 0.7)' }}
+            >
+              <div className="flex flex-col items-center">
+                <span className="text-xs mb-1">{nickname}</span>
+                <div className="flex gap-2">
                   {Object.keys(cooldowns).map((cooldownName) => {
                     const isCooldownActive = userCooldowns[cooldownName];
+                    const icon = (() => {
+                      switch (cooldownName) {
+                        case "bota":
+                          return <BoltIcon className="h-4 w-4" />;
+                        case "peito":
+                          return <ShieldExclamationIcon className="h-4 w-4" />;
+                        case "pocao":
+                          return <BeakerIcon className="h-4 w-4" />;
+                        case "ultimate":
+                          return <StarIcon className="h-4 w-4" />;
+                        default:
+                          return null;
+                      }
+                    })();
+
                     return (
                       <span
                         key={cooldownName}
-                        className={`mr-2 ${
+                        className={`mr-1 ${
                           isCooldownActive ? "text-red-500" : "text-green-500"
                         }`}
                       >
-                        {cooldownName.charAt(0).toUpperCase() + cooldownName.slice(1)}{" "}
-                        {isCooldownActive ? "Ativo" : "Inativo"}
+                        {icon}
                       </span>
                     );
                   })}
-                </span>
+                </div>
+              </div>
+              <div className="flex flex-col ml-2">
                 <button
                   onClick={() => moveUser(index, "up")}
-                  className="ml-2 text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 mb-1"
                 >
                   ↑
                 </button>
                 <button
                   onClick={() => moveUser(index, "down")}
-                  className="ml-2 text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700"
                 >
                   ↓
                 </button>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
-      <BackToMenuButton />
     </div>
-  );
-}
+  </div>
+);
+1
+}  
