@@ -6,6 +6,12 @@ import { ref, set, update, onValue } from "firebase/database";
 import BackToMenuButton, { DeleteUserButton } from "./buttonRtnLogin";
 import { BeakerIcon, BoltIcon, FireIcon, ShieldExclamationIcon, StarIcon } from "@heroicons/react/16/solid";
 
+const colorOptions = {
+  default: "rgba(31, 41, 55, 0.2)", // Cinza escuro
+  green: "rgba(34, 197, 94, 0.2)",  // Verde
+  red: "rgba(239, 68, 68, 0.2)",    // Vermelho
+  yellow: "rgba(234, 179, 8, 0.2)", // Amarelo
+};
 export default function CdPage() {
   const [cooldowns, setCooldowns] = useState({
     bota: false,
@@ -21,8 +27,10 @@ export default function CdPage() {
     pocao: 60,
     ultimate: 60,
   });
-
   const partyId = typeof window !== "undefined" ? localStorage.getItem("partyId") : null;
+const [tempColors, setTempColors] = useState({});
+  const [isSelectVisible, setSelectVisible] = useState(true); // Estado para controlar a visibilidade do select
+
 
   // Função para atualizar o cooldown específico no Firebase sem sobrescrever os outros cooldowns
   const updateCooldown = (nickname: string, cooldownName: string, cooldownStatus: boolean) => {
@@ -60,7 +68,6 @@ export default function CdPage() {
       updateCooldown(nickname, cooldownName, false);
     }, cooldownTime); // Usa o tempo configurado no login
   };
-
   // Efeito para pegar a lista de usuários e suas informações de cooldown do Firebase
   useEffect(() => {
     if (!partyId) {
@@ -181,6 +188,23 @@ export default function CdPage() {
       localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
     }
   };
+  useEffect(() => {
+      const handleEvent = (event: { event: string }) => {
+        if (event.event === "esconder") {
+          setSelectVisible(false);
+        } else if (event.event === "exibir") {
+          setSelectVisible(true);
+        }
+      };
+  
+      listen("esconder", handleEvent);
+      listen("exibir", handleEvent);
+  
+      return () => {
+        listen("esconder", handleEvent).then((unlisten) => unlisten());
+        listen("exibir", handleEvent).then((unlisten) => unlisten());
+      };
+    }, []);
 
   return (
   <div className="flex flex-col items-center">
@@ -191,11 +215,12 @@ export default function CdPage() {
       <div className="flex flex-wrap justify-start gap-2">
         {orderedUsers.map((nickname, index) => {
           const userCooldowns = users[nickname]?.cooldown || {};
+          const bgColor = tempColors[nickname] || colorOptions.default;
           return (
             <div
               key={nickname}
               className="flex items-center p-3 bg-gray-800 text-white rounded opacity-80 w-32 h-20 justify-center flex-grow sm:w-28 md:w-32 lg:w-36"
-              style={{ backgroundColor: 'rgba(31, 41, 55, 0.7)' }}
+              style={{ backgroundColor: bgColor }}
             >
               <div className="flex flex-col items-center">
                 <span className="text-xs mb-1">{nickname}</span>
@@ -229,7 +254,28 @@ export default function CdPage() {
                     );
                   })}
                 </div>
+                {isSelectVisible && (
+                  <select
+                    className="mt-1 text-xs p-0.5 h-6 w-20 rounded-md border border-gray-500 bg-gray-200 text-black appearance-none"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "default") {
+                        const { [nickname]: _, ...rest } = tempColors; // Remove a cor do estado
+                        setTempColors(rest);
+                      } else {
+                        setTempColors({ ...tempColors, [nickname]: value });
+                      }
+                    }}
+                    value={tempColors[nickname] || "default"} // Mantém sincronizado
+                  >
+                    <option value="default">Padrão</option>
+                    <option value={colorOptions.green}>Verde</option>
+                    <option value={colorOptions.red}>Vermelho</option>
+                    <option value={colorOptions.yellow}>Amarelo</option>
+                  </select>
+                )}
               </div>
+              {isSelectVisible && (
               <div className="flex flex-col ml-2">
                 <button
                   onClick={() => moveUser(index, "up")}
@@ -244,6 +290,7 @@ export default function CdPage() {
                   ↓
                 </button>
               </div>
+              )}
             </div>
           );
         })}
@@ -251,5 +298,5 @@ export default function CdPage() {
     </div>
   </div>
 );
-1
+
 }  
