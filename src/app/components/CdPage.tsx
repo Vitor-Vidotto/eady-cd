@@ -208,9 +208,10 @@ const [tempColors, setTempColors] = useState({});
 
   return (
   <div className="flex flex-col items-center">
-    <div className="hidden sm:block "> {/* Oculta o botão em telas pequenas */}
+    {isSelectVisible && (
+    <div > {/* Oculta o botão em telas pequenas */}
       <BackToMenuButton />
-    </div>
+    </div>)}
     <div className="mt-6 w-full">
       <div className="flex flex-wrap justify-start gap-2">
         {orderedUsers.map((nickname, index) => {
