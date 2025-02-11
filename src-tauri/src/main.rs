@@ -37,7 +37,7 @@ fn toggle_decorations(app: &AppHandle) {
         window.set_ignore_cursor_events(true).expect("Falha ao configurar ignorar eventos do cursor");
         println!("Decorations removidas, clicando através.");
     } else {
-        window.set_ignore_cursor_events(false).expect("Falha ao reverter ignorar eventos do cursor");
+        window.set_ignore_cursor_events(true).expect("Falha ao reverter ignorar eventos do cursor");
         println!("Decorations ativadas.");
     }
 }
