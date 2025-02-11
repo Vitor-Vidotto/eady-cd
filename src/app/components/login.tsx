@@ -26,7 +26,7 @@ export default function Login() {
     // Armazenar os tempos de cooldown localmente no localStorage
     localStorage.setItem('ultimateCooldown', ultimateCooldown);
     localStorage.setItem('peitoCooldown', peitoCooldown);
-    localStorage.setItem('elmoCooldown', peitoCooldown);
+    localStorage.setItem('elmoCooldown', elmoCooldown);
     localStorage.setItem('botaCooldown', botaCooldown);
     localStorage.setItem('pocaoCooldown', pocaoCooldown);
 

@@ -130,7 +130,7 @@ const [tempColors, setTempColors] = useState({});
       if (storedElmoCooldown) {
         setCooldownTimes((prev) => ({
           ...prev,
-          bota: parseInt(storedElmoCooldown),
+          elmo: parseInt(storedElmoCooldown),
         }));
       }
       if (storedPocaoCooldown) {
