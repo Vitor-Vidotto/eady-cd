@@ -4,7 +4,6 @@
 
 /* Variáveis para o modo claro */
 :root {
-    --background: #f5deb3; /* Cor trigo (wheat) clara */
     --foreground: #333333; /* Cor do texto em um tom escuro suave */
     --navbar-background: #ededed; /* Cor de fundo da navbar em tom de trigo suave */
     --navbar-text: #121212; /* Cor do texto da navbar em tom marrom suave */
@@ -13,7 +12,6 @@
   
   /* Variáveis para o modo escuro */
   body.dark {
-    --background: #0a0a0aa6;
     --foreground: #f5f5f5; /* Ajustado para um tom claro de texto no modo escuro */
     --navbar-background: #1a1a1a; /* Cor de fundo da navbar no modo escuro */
     --navbar-text: #f5f5f5; /* Cor do texto da navbar no modo escuro */
@@ -28,7 +26,6 @@ body {
 
 /* Estilos da Navbar */
 .navbar {
-  background-color: var(--navbar-background);
   color: var(--navbar-text);
 }
 
@@ -38,9 +35,6 @@ body {
   text-decoration: none;
 }
 
-.navbar .menu-link:hover {
-  color: #ffd700; /* Cor dourada ao passar o mouse */
-}
 
 /* Botão de alternância de tema */
 .button-toggle-theme {
@@ -61,6 +55,5 @@ body {
 
 /* Para aplicar o modo escuro */
 body.dark {
-  background-color: #0a0a0aa6; /* Cor de fundo escura */
   color: #ededed; /* Cor do texto clara */
 }

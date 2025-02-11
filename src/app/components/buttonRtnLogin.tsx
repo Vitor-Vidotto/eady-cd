@@ -1,7 +1,10 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { db } from '../firebase/firebaseConfig';
+
 import { ref, remove } from 'firebase/database';
+import { ArrowLeftCircleIcon } from '@heroicons/react/16/solid';
+import { ArrowLeftIcon } from '@heroicons/react/16/solid';
 
 export default function BackToMenuButton() {
   const router = useRouter();
@@ -27,7 +30,7 @@ export default function BackToMenuButton() {
       onClick={handleLeaveParty}
       className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
     >
-      Voltar ao Menu
+       <ArrowLeftIcon className="h-5 w-5" />
     </button>
   );
 }
