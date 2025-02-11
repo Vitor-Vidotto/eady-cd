@@ -184,7 +184,7 @@ export default function CdPage() {
 
   return (
   <div className="flex flex-col items-center">
-    <div className="sm:hidden"> {/* Oculta o botão em telas pequenas */}
+    <div className="hidden sm:block "> {/* Oculta o botão em telas pequenas */}
       <BackToMenuButton />
     </div>
     <div className="mt-6 w-full">
