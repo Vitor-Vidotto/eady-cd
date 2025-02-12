@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { db } from "../firebase/firebaseConfig";
 import { ref, set, update, onValue } from "firebase/database";
-import BackToMenuButton, { DeleteUserButton } from "./buttonRtnLogin";
+import BackToMenuButton from "./buttonRtnLogin";
 import { BeakerIcon, BoltIcon, FireIcon, ShieldExclamationIcon, StarIcon, UserIcon } from "@heroicons/react/16/solid";
 
 const colorOptions = {
@@ -23,6 +23,7 @@ export default function CdPage() {
   });
   const [users, setUsers] = useState<{ [key: string]: { cooldown: { [key: string]: boolean } } }>( {});
   const [orderedUsers, setOrderedUsers] = useState<string[]>([]);
+  
   const [cooldownTimes, setCooldownTimes] = useState({
     bota: 60,
     peito: 60,
@@ -31,7 +32,8 @@ export default function CdPage() {
     ultimate: 60,
   });
   const partyId = typeof window !== "undefined" ? localStorage.getItem("partyId") : null;
-const [tempColors, setTempColors] = useState({});
+  const [tempColors, setTempColors] = useState<{ [key: string]: string }>({});
+
   const [isSelectVisible, setSelectVisible] = useState(true); // Estado para controlar a visibilidade do select
 
 

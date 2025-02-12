@@ -19,7 +19,7 @@
         "transparent": true,
         "fullscreen": false,
         "alwaysOnTop": true,
-        "url": "http://localhost:3000",
+        "url": "file///H:/albion-cooldown/out/index.html",
         "label": "listamestra", 
         "visible": true
       },
