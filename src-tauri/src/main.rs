@@ -1,33 +1,9 @@
 use tauri::{Manager, AppHandle, Emitter};
 use device_query::{DeviceQuery, Keycode, DeviceState};
 
-fn synchronize(app: &tauri::AppHandle) {
-    app.emit("cooldown", None::<()>).expect("Falha ao emitir evento");
-    println!("emitido");
-}
 
-fn ult(app: &tauri::AppHandle) {
-    app.emit("ultimate", None::<()>).expect("Falha ao emitir evento");
-    println!("ultimate");
-}
-
-fn peito(app: &tauri::AppHandle) {
-    app.emit("peito", None::<()>).expect("Falha ao emitir evento");
-    println!("peito");
-}
-
-fn bota(app: &tauri::AppHandle) {
-    app.emit("bota", None::<()>).expect("Falha ao emitir evento");
-    println!("bota");
-}
-
-fn pocao(app: &tauri::AppHandle) {
-    app.emit("pocao", None::<()>).expect("Falha ao emitir evento");
-    println!("pocao");
-}
-fn elmo(app: &tauri::AppHandle) {
-    app.emit("elmo", None::<()>).expect("Falha ao emitir evento");
-    println!("elmo");
+fn emitir_evento(app: &tauri::AppHandle, evento: &str) {
+    app.emit(evento, None::<()>).expect("Falha ao emitir evento");
 }
 
 
@@ -41,11 +17,9 @@ fn toggle_decorations(app: &AppHandle) {
     // Se as decorações estiverem desativadas, permitir clicar através da janela
     if !is_decorated {
         window.set_ignore_cursor_events(false).expect("Falha ao configurar ignorar eventos do cursor");
-        println!("Decorations removidas, clicando através.");
         app.emit("exibir", None::<()>).expect("Falha ao emitir evento");
     } else {
         window.set_ignore_cursor_events(true).expect("Falha ao reverter ignorar eventos do cursor");
-        println!("Decorations ativadas.");
     }
 }
 
@@ -54,19 +28,19 @@ fn monitor_keyboard(app: AppHandle) {
     loop {
         let keys = device_state.get_keys();
         if keys.contains(&Keycode::Key1) {
-            pocao(&app);
+            emitir_evento(&app, "pocao");
         }
         if keys.contains(&Keycode::E) {
-            ult(&app);
+            emitir_evento(&app, "ultimate");
         }
         if keys.contains(&Keycode::R) {
-            peito(&app);
+            emitir_evento(&app, "peito");
         }
         if keys.contains(&Keycode::F) {
-            bota(&app);
+            emitir_evento(&app, "bota");
         }
         if keys.contains(&Keycode::D) {
-            elmo(&app);
+            emitir_evento(&app, "elmo");
         }
         if keys.contains(&Keycode::F2) {
             toggle_decorations(&app);
