@@ -14,6 +14,8 @@ const colorOptions = {
   yellow: "rgba(234, 179, 8, 0.2)", // Amarelo
 };
 export default function CdPage() {
+    const [scale, setScale] = useState(1); // Inicialmente a escala é 1 (tamanho original)
+    const [gridMode, setGridMode] = useState<"2-cols" | "3-cols" | "free">("2-cols"); // Modo grid
   const [cooldowns, setCooldowns] = useState({
     bota: false,
     peito: false,
@@ -51,6 +53,15 @@ export default function CdPage() {
       .then(() => console.log(`${nickname} cooldown de ${cooldownName} atualizado com sucesso`))
       .catch((error) => console.error("Erro ao atualizar cooldown:", error));
   };
+
+  const handleScaleIncrease = () => {
+    setScale(prevScale => prevScale * 1.1); // Aumenta a escala em 10%
+  };
+
+  const handleScaleDecrease = () => {
+    setScale(prevScale => prevScale / 1.1); // Diminui a escala em 10%
+  };
+
 
   // Função para iniciar o timer do cooldown
   const startCooldownTimer = (cooldownName: keyof typeof cooldownTimes, nickname: string) => {
@@ -222,102 +233,144 @@ export default function CdPage() {
         listen("exibir", handleEvent).then((unlisten) => unlisten());
       };
     }, []);
-
-  return (
-  <div className="flex flex-col items-center">
-    {isSelectVisible && (
-    <div > {/* Oculta o botão em telas pequenas */}
-      <BackToMenuButton />
-    </div>)}
-    <div className="mt-6 w-full">
-      <div className="flex flex-wrap justify-start gap-4">
-        {orderedUsers.map((nickname, index) => {
-          const userCooldowns = users[nickname]?.cooldown || {};
-          const bgColor = tempColors[nickname] || colorOptions.default;
-          return (
-            <div
-              key={nickname}
-              className="flex items-center p-4 bg-gray-800 text-white rounded opacity-80 w-36 h-24 justify-center flex-grow sm:w-28 md:w-36 lg:w-38"
-              style={{ backgroundColor: bgColor }}
+    const toggleGridMode = () => {
+      setGridMode((prevMode) => {
+        if (prevMode === "2-cols") return "3-cols";
+        if (prevMode === "3-cols") return "4-cols";
+        if (prevMode === "4-cols") return "5-cols";
+        return "2-cols"; // Retorna para 2 colunas após 5
+      });
+    };
+    
+    return (
+      <div className="flex flex-col items-center">
+        {isSelectVisible && (
+          <div className="fixed space-x-4 z-50"> {/* Fixando os botões */}
+            <BackToMenuButton />
+            <button
+              onClick={handleScaleIncrease}
+              className="px-4 py-2 bg-blue-500 text-white rounded"
             >
-              <div className="flex flex-col items-center">
-                <span className="text-xs mb-1">{nickname}</span>
-                <div className="flex gap-2">
-                  {Object.keys(cooldowns).map((cooldownName) => {
-                    const isCooldownActive = userCooldowns[cooldownName];
-                    const icon = (() => {
-                      switch (cooldownName) {
-                        case "bota":
-                          return <BoltIcon className="h-4 w-4" />;
-                        case "peito":
-                          return <ShieldExclamationIcon className="h-4 w-4" />;
-                        case "elmo":
-                          return <UserIcon className="h-4 w-4" />;
-                        case "pocao":
-                          return <BeakerIcon className="h-4 w-4" />;
-                        case "ultimate":
-                          return <StarIcon className="h-4 w-4" />;
-                        default:
-                          return null;
-                      }
-                    })();
-
-                    return (
-                      <span
-                        key={cooldownName}
-                        className={`mr-1 ${
-                          isCooldownActive ? "text-red-500" : "text-green-500"
-                        }`}
-                      >
-                        {icon}
-                      </span>
-                    );
-                  })}
-                </div>
-                {isSelectVisible && (
-                  <select
-                    className="mt-1 text-xs p-0.5 h-6 w-20 rounded-md border border-gray-500 bg-gray-200 text-black appearance-none"
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "default") {
-                        const { [nickname]: _, ...rest } = tempColors; // Remove a cor do estado
-                        setTempColors(rest);
-                      } else {
-                        setTempColors({ ...tempColors, [nickname]: value });
-                      }
-                    }}
-                    value={tempColors[nickname] || "default"} // Mantém sincronizado
+              +
+            </button>
+            <button
+              onClick={handleScaleDecrease}
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+            >
+              -
+            </button>
+            <button
+              onClick={toggleGridMode}
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+            >
+              Grid Mode
+            </button>
+          </div>
+        )}
+    
+        <div className="mt-24 w-full top-32" style={{ transform: `scale(${scale})` }}>
+          <div className="flex flex-wrap justify-start gap-4">
+            <div
+              className={`grid gap-4 ${
+                gridMode === "2-cols"
+                  ? "grid-cols-2"
+                  : gridMode === "3-cols"
+                  ? "grid-cols-3"
+                  : gridMode === "4-cols"
+                  ? "grid-cols-4"
+                  : gridMode === "5-cols"
+                  ? "grid-cols-5"
+                  : "grid-cols-2" // Default fallback para 2 colunas
+              }`}
+            >
+              {orderedUsers.map((nickname, index) => {
+                const userCooldowns = users[nickname]?.cooldown || {};
+                const bgColor = tempColors[nickname] || colorOptions.default;
+                return (
+                  <div
+                    key={nickname}
+                    className="flex items-center p-4 bg-gray-800 text-white rounded opacity-80 w-36 h-24 justify-center flex-grow sm:w-28 md:w-36 lg:w-38"
+                    style={{ backgroundColor: bgColor }}
                   >
-                    <option value="default">Padrão</option>
-                    <option value={colorOptions.green}>Verde</option>
-                    <option value={colorOptions.blue}>Azul</option>
-                    <option value={colorOptions.red}>Vermelho</option>
-                    <option value={colorOptions.yellow}>Amarelo</option>
-                  </select>
-                )}
-              </div>
-              {isSelectVisible && (
-              <div className="flex flex-col ml-2">
-                <button
-                  onClick={() => moveUser(index, "up")}
-                  className="text-blue-500 hover:text-blue-700 mb-1"
-                >
-                  ↑
-                </button>
-                <button
-                  onClick={() => moveUser(index, "down")}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  ↓
-                </button>
-              </div>
-              )}
+                    <div className="flex flex-col items-center p-2"> {/* Aqui eu adicionei o padding */}
+                      <span className="text-xs mb-1">{nickname}</span>
+                      <div className="flex gap-2">
+                        {Object.keys(cooldowns).map((cooldownName) => {
+                          const isCooldownActive = userCooldowns[cooldownName];
+                          const icon = (() => {
+                            switch (cooldownName) {
+                              case "bota":
+                                return <BoltIcon className="h-4 w-4" />;
+                              case "peito":
+                                return <ShieldExclamationIcon className="h-4 w-4" />;
+                              case "elmo":
+                                return <UserIcon className="h-4 w-4" />;
+                              case "pocao":
+                                return <BeakerIcon className="h-4 w-4" />;
+                              case "ultimate":
+                                return <StarIcon className="h-4 w-4" />;
+                              default:
+                                return null;
+                            }
+                          })();
+    
+                          return (
+                            <span
+                              key={cooldownName}
+                              className={`mr-1 ${
+                                isCooldownActive ? "text-red-500" : "text-green-500"
+                              }`}
+                            >
+                              {icon}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      {isSelectVisible && (
+                        <select
+                          className="mt-1 text-xs p-0.5 h-6 w-20 rounded-md border border-gray-500 bg-gray-200 text-black appearance-none"
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "default") {
+                              const { [nickname]: _, ...rest } = tempColors; // Remove a cor do estado
+                              setTempColors(rest);
+                            } else {
+                              setTempColors({ ...tempColors, [nickname]: value });
+                            }
+                          }}
+                          value={tempColors[nickname] || "default"} // Mantém sincronizado
+                        >
+                          <option value="default">Padrão</option>
+                          <option value={colorOptions.green}>Verde</option>
+                          <option value={colorOptions.blue}>Azul</option>
+                          <option value={colorOptions.red}>Vermelho</option>
+                          <option value={colorOptions.yellow}>Amarelo</option>
+                        </select>
+                      )}
+                    </div>
+                    {isSelectVisible && (
+                      <div className="flex flex-col ml-2">
+                        <button
+                          onClick={() => moveUser(index, "up")}
+                          className="text-blue-500 hover:text-blue-700 mb-1"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          onClick={() => moveUser(index, "down")}
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          ↓
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-);
-
-}  
+    );
+    
+  }    
