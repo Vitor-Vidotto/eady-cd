@@ -62,7 +62,7 @@ export default function CdPage() {
   const handleScaleDecrease = () => {
     setScale(prevScale => prevScale / 1.1); // Diminui a escala em 10%
   };
-  const cooldownTimers = useRef({
+  const cooldownTimers = useRef<{ [key: string]: ReturnType<typeof setTimeout> | null }>({
     bota: null,
     peito: null,
     pocao: null,
