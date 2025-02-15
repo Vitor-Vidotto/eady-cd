@@ -1,5 +1,4 @@
-'use client'
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { db } from "../firebase/firebaseConfig";
 import { ref, set, update, onValue } from "firebase/database";
@@ -13,9 +12,11 @@ const colorOptions = {
   red: "rgba(239, 68, 68, 0.2)",    // Vermelho
   yellow: "rgba(234, 179, 8, 0.2)", // Amarelo
 };
+
 export default function CdPage() {
     const [scale, setScale] = useState(1); // Inicialmente a escala é 1 (tamanho original)
-    const [gridMode, setGridMode] = useState<"2-cols" | "3-cols" | "free">("2-cols"); // Modo grid
+    const [gridMode, setGridMode] = useState<"2-cols" | "3-cols" | "4-cols" | "5-cols" | "free">("2-cols");
+
   const [cooldowns, setCooldowns] = useState({
     bota: false,
     peito: false,
@@ -61,29 +62,52 @@ export default function CdPage() {
   const handleScaleDecrease = () => {
     setScale(prevScale => prevScale / 1.1); // Diminui a escala em 10%
   };
+  const cooldownTimers = useRef({
+    bota: null,
+    peito: null,
+    pocao: null,
+    elmo: null,
+    ultimate: null,
+  });
 
+// Função para iniciar o timer do cooldown
+const startCooldownTimer = (cooldownName: keyof typeof cooldownTimes, nickname: string) => {
+  // Verificar se já existe um timer ativo para o cooldown
+  if (cooldowns[cooldownName]) {
+    console.log(`${cooldownName} já está em cooldown.`);
+    return; // Não iniciar outro timer se já estiver ativo
+  }
 
-  // Função para iniciar o timer do cooldown
-  const startCooldownTimer = (cooldownName: keyof typeof cooldownTimes, nickname: string) => {
-    const cooldownTime = cooldownTimes[cooldownName] * 1000; // Tempo do cooldown em milissegundos
+  // Verificar se existe um timer pendente (referência no useRef)
+  if (cooldownTimers.current[cooldownName]) {
+    console.log(`Timer de ${cooldownName} já iniciado.`);
+    return; // Se já houver um timer em andamento, não cria outro
+  }
 
+  const cooldownTime = cooldownTimes[cooldownName] * 1000; // Tempo do cooldown em milissegundos
+
+  // Ativar o cooldown para esse item
+  setCooldowns((prevCooldowns) => ({
+    ...prevCooldowns,
+    [cooldownName]: true,
+  }));
+
+  // Atualizar o Firebase para indicar que o cooldown foi ativado
+  updateCooldown(nickname, cooldownName, true);
+
+  // Iniciar o timer independente para cada cooldown
+  cooldownTimers.current[cooldownName] = setTimeout(() => {
     setCooldowns((prevCooldowns) => ({
       ...prevCooldowns,
-      [cooldownName]: true,
+      [cooldownName]: false,
     }));
 
-    // Atualizar o Firebase para indicar que o cooldown foi ativado
-    updateCooldown(nickname, cooldownName, true);
+    updateCooldown(nickname, cooldownName, false);
 
-    // Iniciar o timer independente para cada cooldown
-    setTimeout(() => {
-      setCooldowns((prevCooldowns) => ({
-        ...prevCooldowns,
-        [cooldownName]: false,
-      }));
-      updateCooldown(nickname, cooldownName, false);
-    }, cooldownTime); // Usa o tempo configurado no login
-  };
+    // Limpar o timer após o cooldown
+    cooldownTimers.current[cooldownName] = null;
+  }, cooldownTime); // Usa o tempo configurado no login
+};
   // Efeito para pegar a lista de usuários e suas informações de cooldown do Firebase
   useEffect(() => {
     if (!partyId) {
@@ -161,6 +185,8 @@ export default function CdPage() {
       const nickname = typeof window !== "undefined" ? localStorage.getItem("nickname") : null;
       if (!nickname) return;
 
+      console.log('Evento de cooldown recebido:', event);
+
       switch (event.event) {
         case "bota":
           startCooldownTimer("bota", nickname);
@@ -216,6 +242,7 @@ export default function CdPage() {
       localStorage.setItem("orderedUsers", JSON.stringify(newOrderedUsers));
     }
   };
+
   useEffect(() => {
       const handleEvent = (event: { event: string }) => {
         if (event.event === "esconder") {
@@ -233,15 +260,17 @@ export default function CdPage() {
         listen("exibir", handleEvent).then((unlisten) => unlisten());
       };
     }, []);
-    const toggleGridMode = () => {
-      setGridMode((prevMode) => {
-        if (prevMode === "2-cols") return "3-cols";
-        if (prevMode === "3-cols") return "4-cols";
-        if (prevMode === "4-cols") return "5-cols";
-        return "2-cols"; // Retorna para 2 colunas após 5
-      });
-    };
-    
+
+  const toggleGridMode = () => {
+    setGridMode((prevMode) => {
+      if (prevMode === "2-cols") return "3-cols";
+      if (prevMode === "3-cols") return "4-cols";
+      if (prevMode === "4-cols") return "5-cols";
+      return "2-cols"; // Retorna para 2 colunas após 5
+    });
+  };
+
+   
     return (
       <div className="flex flex-col items-center">
         {isSelectVisible && (
