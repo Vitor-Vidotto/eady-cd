@@ -9,7 +9,7 @@ fn emitir_evento(app: &tauri::AppHandle, evento: &str) {
 
 // Alterna as bordas da janela (decorations) e permite clicar através
 fn toggle_decorations(app: &AppHandle) {
-    let window = app.get_webview_window("listamestra").expect("Janela não encontrada");
+    let window = app.get_webview_window("easycd").expect("Janela não encontrada");
     let is_decorated = window.is_decorated().unwrap_or(true); // Obtém o estado atual
     window.set_decorations(!is_decorated).expect("Falha ao alternar decorations");
     app.emit("esconder", None::<()>).expect("Falha ao emitir evento");

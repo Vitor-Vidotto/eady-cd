@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Easy CD",  
   "version": "0.1.0",
-  "identifier": "listamestra",
+  "identifier": "easycd",
   "build": {
     "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
@@ -19,8 +19,8 @@
         "transparent": true,
         "fullscreen": false,
         "alwaysOnTop": true,
-        "url": "file///H:/albion-cooldown/out/index.html",
-        "label": "listamestra", 
+        "url": "http://localhost:3000",
+        "label": "easycd", 
         "visible": true
       },
       {
